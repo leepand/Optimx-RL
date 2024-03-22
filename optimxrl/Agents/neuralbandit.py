@@ -6,6 +6,14 @@ import random
 import numpy as np
 
 
+def safe_div(a, b):
+    """Returns a if b is nil, else divides a by b.
+    When scaling, sometimes a denominator might be nil. For instance, during standard scaling
+    the denominator can be nil if a feature has no variance.
+    """
+    return a / b if b else 0.0
+
+
 class NeuralBandit:
     def __init__(
         self,
@@ -14,9 +22,11 @@ class NeuralBandit:
         hidden_dim=32,
         lr=0.01,
         eps=0.2,
+        clip_ratio=0.2,
         model_db=None,
         no_bias=False,
     ):
+        self.clip_ratio = clip_ratio
         self.actions = [a for a in range(act_dim)]
         self.n_actions = act_dim
         self.n_features = feature_dim
@@ -91,15 +101,23 @@ class NeuralBandit:
             action = self.argmax_rand(action_probs_dict)
         return action
 
-    def learn(self, x, action, reward, model_id):
+    def learn(self, x, action, reward, model_id, if_clip=False):
         if isinstance(x, list):
             x = np.array[True, :]
         model = self._model_storage.get_model(model_id=model_id, w_type="model")
         if model is None:
             model = self._init_model()
         y_hat, h_list, x_list = self.onlineNet.infer(x, w_s=model, predict=False)
+        Q = np.copy(y_hat)
+        if if_clip:
+            old_Q_action = Q[range(Q.shape[0]), int(action)]
+            clip_Q = safe_div(reward, old_Q_action)
+            new_reward_rate = np.clip(clip_Q, 1 - self.clip_ratio, 1 + self.clip_ratio)
+            Q[range(Q.shape[0]), int(action)] = new_reward_rate * old_Q_action
+        else:
+            Q[range(Q.shape[0]), int(action)] = reward
         model, weights = self.onlineNet.train(
-            y=y_hat, input_=x_list, target_=reward, h1=h_list, model=model
+            y=y_hat, input_=x_list, target_=Q, h1=h_list, model=model
         )
         self._model_storage.save_model(model=model, model_id=model_id, w_type="model")
         self._model_storage.save_model(
