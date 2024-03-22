@@ -17,7 +17,6 @@ def argmax_rand(dict_arr):
     # Return the selected key
     return selected_key
 
-
 class trainer_config:
     """
     configuration for the Q learner (trainer) for easy reuse
