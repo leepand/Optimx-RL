@@ -2,6 +2,7 @@
 Model storage
 """
 from abc import abstractmethod
+import pickle
 
 
 class ModelStorage(object):
@@ -29,3 +30,28 @@ class MemoryModelStorage(ModelStorage):
 
     def save_model(self, model):
         self._model = model
+
+
+class ModelDB(ModelStorage):
+    def __init__(self, model_db):
+        self._model_db = model_db
+
+    def get_model(self, model_id, w_type="model"):
+        VALID_W_TYPES = ("model", "params")
+        assert (
+            w_type in VALID_W_TYPES
+        ), f"Model weights type {w_type} not supported. Valid weights types are {VALID_W_TYPES}"
+        model_key = f"{model_id}:{w_type}"
+        model = self._model_db.get(model_key)
+        if model is not None:
+            model = pickle.loads(model)
+        return model
+
+    def save_model(self, model, model_id, w_type="model"):
+        VALID_W_TYPES = ("model", "params")
+        assert (
+            w_type in VALID_W_TYPES
+        ), f"Model weights type {w_type} not supported. Valid weights types are {VALID_W_TYPES}"
+        model_key = f"{model_id}:{w_type}"
+        model["model_updated_cnt"] += 1
+        self._model_db.set(model_key, pickle.dumps(model))

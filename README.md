@@ -28,7 +28,7 @@ optimxrl.ActivationFunctions.ReLU() etc
 
 我们可以使用 optimxrl 中的这个网络类创建具有不同层的神经网络。我们可以创建诸如 net=Network() 的网络，然后我们可以向网络添加层。比如 fc1、激活1、fc2、激活2 或 conv1、激活1、conv2、激活2、reshape 层、fc1、激活1 等。
 
-# 4. 损失函数：
+## 4. 损失函数：
 
 optimxrl 提供了各种损失函数，例如交叉熵、均方误差和二元交叉熵，这些函数用于评估训练期间模型的性能并计算每个层中每个权重的损失导数。
 
@@ -39,7 +39,7 @@ optimxrl.LossFunctions.CrossEntropy().Loss(true_values,predictions) computes and
 optimxrl.LossFunctions.CrossEntropy().backward(network,true_values,predictions) computes derivatives of loss function with respect to each weight in each layer.
 ```
 
-# 5. 优化算法：
+## 5. 优化算法：
 
 optimxrl 提供了不同的优化算法，如梯度下降、带动量的梯度下降、RMSprop 和 Adam，用于调整模型参数并最小化损失函数。
 

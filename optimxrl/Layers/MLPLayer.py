@@ -1,4 +1,5 @@
 import numpy as np
+from ..ActivationFunctions.Tanh import Tanh2
 
 ###################### regularization ####################################################
 def L2_norm(lam, a):
@@ -6,6 +7,15 @@ def L2_norm(lam, a):
     2-Norm regularizer
     """
     return lam * a
+
+
+def f_iden(a, dev=False):
+    """
+    identity transfer function
+    """
+    if dev == True:
+        return np.ones(a.shape)
+    return a
 
 
 ############################ MLP (Multi-layer perceptron neural networks) ###########################################
@@ -34,7 +44,7 @@ class MLPLayer:
 
     """
 
-    def __init__(self, in_dim, nodes=32, no_bias=False, activation_fun=None):
+    def __init__(self, in_dim, nodes=32, no_bias=False, activation_fun=Tanh2().f_tanh):
 
         # activation and weights
         self.no_bias = no_bias
