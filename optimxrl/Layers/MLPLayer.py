@@ -20,7 +20,7 @@ def f_iden(a, dev=False):
 
 ############################ MLP (Multi-layer perceptron neural networks) ###########################################
 ### network layer
-class MLPLayer:
+class layer:
     """
     actiavtion layer for model building:
         layer(input_dimension,number_of_nodes)
