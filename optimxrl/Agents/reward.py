@@ -4,6 +4,8 @@ from ..LossFunctions import Qef
 from ..ActivationFunctions.Tanh import Tanh2
 from ..Storage.model import ModelDB
 
+import numpy as np
+
 
 class RewardAgent:
     def __init__(
@@ -71,6 +73,8 @@ class RewardAgent:
         return weights
 
     def predict(self, x, model_id):
+        if isinstance(x, list):
+            x = np.array(x)[True, :]
         model_weights = self._model_storage.get_model(
             model_id=model_id, w_type="params"
         )
@@ -83,6 +87,8 @@ class RewardAgent:
         """updates the onlineDQN with target Q values for
         the greedy action(choosen by onlineDQN)
         """
+        if isinstance(x, list):
+            x = np.array(x)[True, :]
         model = self._model_storage.get_model(model_id=model_id, w_type="model")
         if model is None:
             model = self._init_model()

@@ -17,6 +17,7 @@ def argmax_rand(dict_arr):
     # Return the selected key
     return selected_key
 
+
 class trainer_config:
     """
     configuration for the Q learner (trainer) for easy reuse
@@ -128,6 +129,8 @@ class DQNAgent:
         return weights
 
     def act(self, state, model_id, allowed=None, not_allowed=None):
+        if isinstance(state, list):
+            state = np.array(state)[True, :]
         model_weights = self._model_storage.get_model(
             model_id=model_id, w_type="params"
         )
@@ -159,6 +162,10 @@ class DQNAgent:
         """updates the onlineDQN with target Q values for
         the greedy action(choosen by onlineDQN)
         """
+        if isinstance(state, list):
+            state = np.array(state)[True, :]
+        if isinstance(next_state, list):
+            next_state = np.array(next_state)[True, :]
         model = self._model_storage.get_model(model_id=model_id, w_type="model")
         if model is None:
             model = self._init_model()
