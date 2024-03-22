@@ -1,4 +1,4 @@
-from ..LossFunctions import Qef
+from ..LossFunctions.Qef import Qef
 
 ### models
 class RewardModel:
@@ -13,9 +13,9 @@ class RewardModel:
 
     """
 
-    def __init__(self, Layerlist, no_bias=True, error_fun=Qef().Loss):
+    def __init__(self, Layerlist, no_bias=True):
         self.Layerlist = Layerlist
-        self.erf = error_fun
+        self.erf = Qef().Loss  # qef
         self.no_bias = no_bias
 
     def infer(self, input_, w_s, predict=False):
