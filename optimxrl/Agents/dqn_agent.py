@@ -144,6 +144,7 @@ class DQNAgent:
         Q_value = self.model.predict(x=state, model=model)
         t = self.model.predict(next_state, model=model)
         a = np.argmax(t, axis=0)
+        print(action,type(action),a,type(a))
         Q_value[int(action)] = reward + np.logical_not(done) * self.GAMMA * t[a]
         model = self.model.fit(
             state,
