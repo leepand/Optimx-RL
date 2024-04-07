@@ -112,11 +112,12 @@ class DQNAgent:
         if random.random() < self.eps:
 
             action = random.choice(valid_actions)
+            print(action,"r")
         else:
             action_probs = self.model.predict(x=x, model=model)
             action_probs_dict = {a: action_probs[a] for a in valid_actions}
             action = argmax_rand(action_probs_dict)
-
+            print(action,"m",action_probs_dict,action_probs)
         return action
 
     def learn(
