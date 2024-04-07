@@ -114,9 +114,7 @@ class DQNAgent:
             action = random.choice(valid_actions)
         else:
             action_probs = self.model.predict(x=x, model=model)
-            action_probs_dict = {
-                a: action_probs[range(action_probs.shape[0]), a] for a in valid_actions
-            }
+            action_probs_dict = {a: action_probs[a] for a in valid_actions}
             action = argmax_rand(action_probs_dict)
 
         return action
@@ -146,9 +144,7 @@ class DQNAgent:
         Q_value = self.model.predict(x=state, model=model)
         t = self.model.predict(next_state, model=model)
         a = np.argmax(t, axis=1)
-        Q_value[range(Q_value.shape[0]), int(action)] = (
-            reward + np.logical_not(done) * self.GAMMA * t[range(t.shape[0]), a]
-        )
+        Q_value[int(action)] = reward + np.logical_not(done) * self.GAMMA * t[a]
         model = self.model.fit(
             state,
             Q_value,
