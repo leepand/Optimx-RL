@@ -28,9 +28,9 @@ def argmax_rand(dict_arr):
 class DQNAgent:
     def __init__(
         self,
+        actions,
         input_dim,
         hidden_dim,
-        out_dim,
         int_type="xavier",
         opt="adam",
         model_db=None,
@@ -40,6 +40,8 @@ class DQNAgent:
         out_type="sig",
         last_line=False,
     ):
+        self.actions = actions
+        out_dim = len(actions)
         self.model = DQNPolicy(lr=lr)
         # Our network architecture has the shape:
         #       (input)--> [Linear->Sigmoid] -> [Linear->Sigmoid]->[Linear->Sigmoid] -->(output)
@@ -155,3 +157,35 @@ class DQNAgent:
             print_cost=print_cost,
         )
         self._model_storage.save_model(model=model, model_id=model_id, w_type="model")
+
+    def _get_valid_actions(self, forbidden_actions, all_actions=None):
+        """
+        Given a set of forbidden action IDs, return a set of valid action IDs.
+
+        Parameters
+        ----------
+        forbidden_actions: Optional[Set[ActionId]]
+            The set of forbidden action IDs.
+
+        Returns
+        -------
+        valid_actions: Set[ActionId]
+            The list of valid (i.e. not forbidden) action IDs.
+        """
+        if all_actions is None:
+            all_actions = self.actions
+        if forbidden_actions is None:
+            forbidden_actions = set()
+        else:
+            forbidden_actions = set(forbidden_actions)
+
+        if not all(a in all_actions for a in forbidden_actions):
+            raise ValueError("forbidden_actions contains invalid action IDs.")
+        valid_actions = set(all_actions) - forbidden_actions
+        if len(valid_actions) == 0:
+            raise ValueError(
+                "All actions are forbidden. You must allow at least 1 action."
+            )
+
+        valid_actions = list(valid_actions)
+        return valid_actions
