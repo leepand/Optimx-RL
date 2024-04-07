@@ -40,7 +40,7 @@ class DQNPolicy:
         """
         self.layers.append(layer)
 
-    def predict(self, x, model):
+    def predict(self, x, model, update_mode=False):
         """Predicts.
 
         Given a set of data X, this function makes a prediction of X.
@@ -57,18 +57,23 @@ class DQNPolicy:
 
         """
         # Forward pass
+        x_list = []
         for i, _ in enumerate(self.layers):
             if self.layers[i].layer_type != "Linear":
                 forward = self.layers[i].forward(x)
+                x_list.append(forward)
             else:
                 W = model[f"W{i}"]
                 b = model[f"b{i}"]
-                forward = self.layers[i].forward(x, W, b)
+                A_prev, forward = self.layers[i].forward(x, W, b, False)
+                x_list.append(A_prev)
             x = forward
+        if update_mode:
+            return forward, x_list
+        else:
+            return forward
 
-        return forward
-
-    def fit(self, x, y, model, loss_function="BE", print_cost=False):
+    def fit(self, x_list, y_hat, y, model, loss_function="BE", print_cost=False):
         """Runs epoch.
 
         Helper function of train procedure.
@@ -93,19 +98,8 @@ class DQNPolicy:
 
         """
         # Forward pass
-        x_list = []
 
-        for i, _ in enumerate(self.layers):
-            if self.layers[i].layer_type != "Linear":
-                forward = self.layers[i].forward(x)
-                x_list.append(forward)
-            else:
-                W = model[f"W{i}"]
-                b = model[f"b{i}"]
-                A_prev, forward = self.layers[i].forward(x, W, b, False)
-                x_list.append(A_prev)
-            x = forward
-
+        forward = y_hat
         # Compute loss and first gradient
         if loss_function == "BE":
             cost, dY_hat = compute_stable_bce_cost(y, forward)
@@ -114,7 +108,7 @@ class DQNPolicy:
         else:
             raise ValueError(f"{loss_function} is not supported.")
         if print_cost:
-            print("Cost at epoch#{}: {}".format(i, cost))
+            print("Cost at epoch#{}: {}".format("yhat", cost))
         # $ print(x_list,"x_list")
         # Backpropagation
         layers = len(self.layers)

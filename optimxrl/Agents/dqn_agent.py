@@ -142,13 +142,15 @@ class DQNAgent:
         if model is None:
             model = self._init_model()
 
-        Q_value = self.model.predict(x=state, model=model)
+        Q_value, x_list = self.model.predict(x=state, model=model, update_mode=True)
         t = self.model.predict(next_state, model=model)
         a = np.argmax(t, axis=0)
+        Q = np.copy(Q_value)
         # print(action,type(action),a,type(a))
         Q_value[int(action)] = reward + np.logical_not(done) * self.GAMMA * t[a]
         model = self.model.fit(
-            state,
+            x_list,
+            Q,
             Q_value,
             model,
             loss_function=loss_function,
