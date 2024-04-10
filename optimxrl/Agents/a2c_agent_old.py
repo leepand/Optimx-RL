@@ -42,10 +42,10 @@ class A2CAgent:
         lr=0.005,
         eps=0.1,
         gamma=0.99,
-        actor_out_type="tanh",
-        critic_out_type="tanh",
-        actor_last_layer_type="sig",
-        critic_last_layer_type="sig",
+        actor_out_type="relu",
+        critic_out_type="relu",
+        actor_last_layer_type="softmax",
+        critic_last_layer_type="iden",
     ):
         self.actions = actions
         out_dim = len(actions)
@@ -64,7 +64,7 @@ class A2CAgent:
         self.model_critic = self.create_critic(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
-            out_dim=out_dim,
+            out_dim=1,
             int_type=int_type,
             opt=opt,
             out_type=critic_out_type,
@@ -203,20 +203,6 @@ class A2CAgent:
         params["model_updated_cnt"] = 0
         return params
 
-    def update_critic_model(self, model):
-        j = 0
-        Layerlist_critic = copy.deepcopy(self.model_critic.layers)
-        for LC in Layerlist_critic:
-            if LC.layer_type == "Linear":
-                model[f"{self.critic_net_type}_W{j}"] = model[
-                    f"{self.actor_net_type}_W{j}"
-                ]
-                model[f"{self.critic_net_type}_b{j}"] = model[
-                    f"{self.actor_net_type}_b{j}"
-                ]
-            j += 1
-        return model
-
     def act(self, x, model_id, allowed=None, not_allowed=None):
         if isinstance(x, list):
             x = np.array(x).reshape(-1, 1)
@@ -268,46 +254,37 @@ class A2CAgent:
         _action_probs, x_list_actor = self.model_actor.predict(
             x=state, model=model, update_mode=True
         )
-        model_updated_cnt = model["model_updated_cnt"]
-        if model_updated_cnt % 10 == 0:
-            model = self.update_critic_model(model=model)
-        #value_curr, x_list_critic = self.model_critic.predict(
-        #    x=next_state, model=model, update_mode=True
-        #)
-        value_next = self.model_critic.predict(next_state, model=model)
-        Q = np.copy(_action_probs)
-        # print(action,type(action),a,type(a))
-        a = np.argmax(value_next, axis=0)
-
-        _action_probs[int(action)] = (
-            reward + (1 - np.logical_not(done)) * self.GAMMA * value_next[a]
+        value_curr, x_list_critic = self.model_critic.predict(
+            x=state, model=model, update_mode=True
         )
+        value_next = self.model_critic.predict(next_state, model=model)
+        Q = np.copy(value_curr)
+        # print(action,type(action),a,type(a))
+        TD_target = reward + (1 - np.logical_not(done)) * self.GAMMA * value_next
         # Q_value[int(action)] = reward + np.logical_not(done) * self.GAMMA * t[a]
         # critic_target= advantage
-        # advantage = TD_target - value_curr
+        advantage = TD_target - value_curr
+        action_probs = _action_probs
+        ps = np.maximum(1.0e-5, np.minimum(1.0 - 1e-5, action_probs))
+        log_probs = np.log(ps)
+        log_probs_curr = np.copy(log_probs)
         # print(log_probs,advantage,"advantage")
-        # for a in self.actions:
-        #    if a==action:
-        #        _action_probs[int(a)] = TD_target[0]
-        #    else:
-        #         _action_probs[int(a)] = advantage[0]
-        # _action_probs[int(action)] *= advantage[0]
-
+        log_probs[int(action)] *= advantage[0]
         # dy = advantage[0] / action_probs[int(action)]
-        # model = self.model_critic.fit(
-        #    x_list_critic,
-        #    value_curr,
-        #    TD_target,
-        #    model,
-        #    loss_function="MSE",
-        #    print_cost=print_cost,
-        # )
-        model = self.model_actor.fit(
-            x_list_actor,
-            Q,
-            _action_probs,
+        model = self.model_critic.fit(
+            x_list_critic,
+            value_curr,
+            TD_target,
             model,
             loss_function="MSE",
+            print_cost=print_cost,
+        )
+        model = self.model_actor.fit(
+            x_list_actor,
+            log_probs_curr,
+            log_probs,
+            model,
+            loss_function="BE",
             print_cost=print_cost,
         )
 

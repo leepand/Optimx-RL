@@ -56,6 +56,72 @@ class SigmoidLayer:
         return dZ
 
 
+def f_softmax(a, dev=False):
+    """
+    softmax transfer function
+        sigmoidal [0,1]
+    """
+
+    if dev == True:
+        return f_softmax(a) * (1 - f_softmax(a))
+    return np.exp(a) / np.sum(np.exp(a))
+
+
+class Softmax:
+    """
+    This file implements activation layers
+    inline with a computational graph model
+
+    Args:
+        shape: shape of input to the layer
+
+    Methods:
+        forward(Z)
+        backward(upstream_grad)
+
+    """
+
+    def __init__(self, output_dim):
+        """
+        The consturctor of the sigmoid/logistic activation layer takes in the following arguments
+
+        Args:
+            shape: shape of input to the layer
+        """
+        self.layer_type = "Softmax"
+        self.units = output_dim
+        # self.A = np.zeros(shape)  # create space for the resultant activations
+
+    def __str__(self):
+        return f"{self.layer_type} Layer"
+
+    def forward(self, Z, predict=True):
+        """
+        This function performs the forwards propagation step through the activation function
+
+        Args:
+            Z: input from previous (linear) layer
+        """
+        A = f_softmax(A)  # compute activations
+        if predict:
+            return A
+        else:
+            return Z
+
+    def backward(self, upstream_grad, A):
+        """
+        This function performs the  back propagation step through the activation function
+        Local gradient => derivative of sigmoid => A*(1-A)
+
+        Args:
+            upstream_grad: gradient coming into this layer from the layer above
+
+        """
+        # couple upstream gradient with local gradient, the result will be sent back to the Linear layer
+        dZ = upstream_grad * f_softmax(A, dev=True)
+        return dZ
+
+
 class ReLU:
     """ReLU.
 

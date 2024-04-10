@@ -1,5 +1,6 @@
 from ..LossFunctions.cost_functions import (
     compute_bce_cost,
+    compute_keras_like_bce_cost,
     compute_stable_bce_cost,
     compute_mse_cost,
 )
@@ -103,7 +104,7 @@ class A2CPolicy:
         forward = y_hat
         # Compute loss and first gradient
         if loss_function == "BE":
-            cost, dY_hat = compute_stable_bce_cost(y, forward)
+            cost, dY_hat = compute_keras_like_bce_cost(y, forward)
         elif loss_function == "MSE":
             cost, dY_hat = compute_mse_cost(y, forward)
         else:
@@ -112,6 +113,8 @@ class A2CPolicy:
             print("Cost at epoch#{}: {}".format("yhat", cost))
         # $ print(x_list,"x_list")
         # Backpropagation
+        # if self.net_type == "actor":
+        #    dY_hat = -y
         layers = len(self.layers)
         # for i, _ in reversed(list(enumerate(self.layers))):
         for L in self.layers[::-1]:

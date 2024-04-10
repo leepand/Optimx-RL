@@ -11,6 +11,7 @@ from .ActivationFunctions.ActivationLayers import (
     Swish,
     LeakyReLU,
     Iden,
+    Softmax,
 )
 
 
@@ -27,6 +28,8 @@ def get_activation_layer_function(out_type="sig"):
         OutLayer = LeakyReLU
     elif out_type == "iden":
         OutLayer = Iden
+    elif out_type == "softmax":
+        OutLayer = Softmax
     else:
         raise ValueError(f"{out_type} is not supported.")
 
