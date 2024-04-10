@@ -10,6 +10,7 @@ from .ActivationFunctions.ActivationLayers import (
     Tanh,
     Swish,
     LeakyReLU,
+    Iden,
 )
 
 
@@ -24,6 +25,8 @@ def get_activation_layer_function(out_type="sig"):
         OutLayer = Swish
     elif out_type == "leak":
         OutLayer = LeakyReLU
+    elif out_type == "iden":
+        OutLayer = Iden
     else:
         raise ValueError(f"{out_type} is not supported.")
 
