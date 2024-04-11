@@ -271,9 +271,9 @@ class A2CAgent:
         model_updated_cnt = model["model_updated_cnt"]
         if model_updated_cnt % 10 == 0:
             model = self.update_critic_model(model=model)
-        #value_curr, x_list_critic = self.model_critic.predict(
+        # value_curr, x_list_critic = self.model_critic.predict(
         #    x=next_state, model=model, update_mode=True
-        #)
+        # )
         value_next = self.model_critic.predict(next_state, model=model)
         Q = np.copy(_action_probs)
         # print(action,type(action),a,type(a))
@@ -312,6 +312,14 @@ class A2CAgent:
         )
 
         self._model_storage.save_model(model=model, model_id=model_id, w_type="model")
+
+    def max_q_value(self, state, model_id):
+        model = self._model_storage.get_model(model_id=model_id, w_type="model")
+        if model is None:
+            model = self._init_model()
+        value_next = self.model_actor.predict(state, model=model)
+        a = np.argmax(value_next, axis=0)
+        return value_next[a]
 
     def _get_valid_actions(self, forbidden_actions, all_actions=None):
         """
