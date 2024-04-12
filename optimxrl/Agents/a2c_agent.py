@@ -9,9 +9,6 @@ import copy
 import numpy as np
 import random
 
-from ..ActivationFunctions.ActivationLayers import Iden
-
-
 def argmax_rand(dict_arr):
     """Return key with maximum value, break ties randomly."""
     assert isinstance(dict_arr, dict)
@@ -253,6 +250,7 @@ class A2CAgent:
         model_id,
         done=False,
         print_cost=False,
+        loss_function="HUBER",
     ):
         if isinstance(state, list):
             state = np.array(state).reshape(-1, 1)
@@ -307,7 +305,7 @@ class A2CAgent:
             Q,
             _action_probs,
             model,
-            loss_function="MSE",
+            loss_function=loss_function,
             print_cost=print_cost,
         )
 

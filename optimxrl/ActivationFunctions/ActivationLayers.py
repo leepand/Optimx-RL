@@ -122,6 +122,7 @@ class Softmax:
         return dZ
 
 
+
 class ReLU:
     """ReLU.
 
@@ -168,8 +169,7 @@ class ReLU:
 
     def backward(self, upstream_grad, A):
         # np.maximum(0, np.sign(a))
-        return upstream_grad * np.heaviside(A, 0.0)
-
+        return upstream_grad * np.maximum(0, np.sign(A))# np.heaviside(A, 0.0)
 
 class Tanh:
     """Tanh.

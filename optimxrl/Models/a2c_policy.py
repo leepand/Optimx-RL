@@ -3,6 +3,7 @@ from ..LossFunctions.cost_functions import (
     compute_keras_like_bce_cost,
     compute_stable_bce_cost,
     compute_mse_cost,
+    compute_huber_cost,
 )
 
 
@@ -107,6 +108,8 @@ class A2CPolicy:
             cost, dY_hat = compute_keras_like_bce_cost(y, forward)
         elif loss_function == "MSE":
             cost, dY_hat = compute_mse_cost(y, forward)
+        elif loss_function == "HUBER":
+            cost, dY_hat = compute_huber_cost(y, forward)
         else:
             raise ValueError(f"{loss_function} is not supported.")
         if print_cost:

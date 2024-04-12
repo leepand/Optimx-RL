@@ -126,6 +126,37 @@ def compute_mse_cost(Y, Y_hat):
     return cost, dY_hat
 
 
+def compute_huber_cost(Y, Y_hat, delta=1.0):
+    """
+    This function computes Mean Squared Error(mse) Cost and returns the Cost and its derivative.
+    This function uses the Squared Error Cost defined as follows:
+    => (1/2m)*sum(Y - Y_hat)^.2
+
+    Args:
+        Y: labels of data
+        Y_hat: Predictions(activations) from a last layer, the output layer
+
+    Returns:
+        cost: The Squared Error Cost result
+        dY_hat: gradient of Cost w.r.t Y_hat
+
+    """
+    m = Y.shape[1]  # m -> number of examples in the batch
+    a = Y_hat - Y
+    cost = np.sum(
+        (delta**2) * (np.sqrt(1 + (a / delta) ** 2) - 1) / (Y_hat.shape[0] * 2.0)
+    )
+    cost = np.squeeze(
+        cost
+    )  # remove extraneous dimensions to give just a scalar (e.g. this turns [[17]] into 17)
+
+    dY_hat = a / (
+        np.sqrt(a**2 / delta**2 + 1)
+    )  # derivative of the squared error cost function
+
+    return cost, dY_hat
+
+
 class MeanSquaredError:
     """
     This function computes Mean Squared Error(mse) Cost and returns the Cost and its derivative.
